@@ -28,6 +28,9 @@ jobs:
     - name: Install HTML-Report
       run: npm install -g newman-reporter-htmlextra
 
+    - name: Create report folders
+      run: mkdir -p newman-reports
+      
     - name: Run getProducts collection
       run: |
         newman run getProducts.json \
@@ -44,6 +47,8 @@ jobs:
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection2.html
       continue-on-error: true
+    - name: Check report files
+      run: ls -R newman-reports/ 
     - name: Upload newman reports
       uses: actions/upload-artifact@v4
       if: always()
