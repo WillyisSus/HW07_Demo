@@ -1,0 +1,13 @@
+name,description,price,category_id,brand_id,product_image_id,is_location_offer,is_rental,expectedStatus,name2,description2,price2,category_id2,brand_id2,product_image_id2,is_location_offer2,is_rental2,expectedStatus2
+Product new,description new,1.99,1,1,1,1,0,200,Product new,description edited,1.99,1,1,1,1,0,200
+Product new,description new,1.99,1,100,1,1,0,404,Product new,description edited,1.99,1,1,1,1,0,200
+Product new,description new,1.99,100,1,1,1,0,404,Product new,description edited,1.99,1,1,1,1,0,200
+Product new,,1.99,1,1,1,1,0,404,Product new,description edited,1.99,1,1,1,1,0,200
+,description new,1.99,1,1,1,1,0,404,Product new,description edited,1.99,1,1,1,1,0,200
+,,,,,,,,404,Product new,description edited,1.99,1,1,1,1,0,200
+Product new,description new,1.99,1,1,1,1,0,200,Product new,description edited,1.99,1,1,1,1,0,200
+Product new,description new,1.99,1,1,1,1,0,200,Product new,description edited,1.99,1,100,1,1,0,404
+Product new,description new,1.99,1,1,1,1,0,200,Product new,description edited,1.99,100,1,1,1,0,404
+Product new,description new,1.99,1,1,1,1,0,200,Product new,,1.99,1,1,1,1,0,404
+Product new,description new,1.99,1,1,1,1,0,200,,description edited,1.99,1,1,1,1,0,404
+Product new,description new,1.99,1,1,1,1,0,200,,,,,,,,,404

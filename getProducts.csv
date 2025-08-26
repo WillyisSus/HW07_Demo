@@ -1,0 +1,8 @@
+brandID,categoryID,priceQuery,sortQuery,expectedStatus
+,,,,200 
+1,,,,200 
+,1,,,200 
+,,price%2C1%2C20,,200 
+,,,price%2Casc,200 
+,,,name%2Casc,200 
+3,9999,price%2C1%2C200,name%2Casc,404 

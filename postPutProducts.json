@@ -1,0 +1,315 @@
+{
+	"info": {
+		"_postman_id": "618422da-8fe6-4f93-87ff-f35513d6e699",
+		"name": "HW06 - POST/PUT Products",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28981845"
+	},
+	"item": [
+		{
+			"name": "LOGIN ADMIN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"if (pm.response.code === 200) {\r",
+							"    pm.test(\"Login - Success\", () => {\r",
+							"        pm.expect(jsonData).to.have.property(\"access_token\");\r",
+							"        pm.expect(jsonData.access_token).to.be.a(\"string\").and.not.empty;\r",
+							"    });\r",
+							"    pm.collectionVariables.set(\"auth_token\", jsonData.access_token);\r",
+							"} else {\r",
+							"    pm.test(\"Login - Failed\", () => {\r",
+							"        pm.expect.fail(\"Error code: \" +\r",
+							"            pm.response.code + \" - \" +\r",
+							"            pm.response.text()\r",
+							"        );\r",
+							"    });\r",
+							"    pm.collectionVariables.set(\"auth_token\", \"\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"admin@practicesoftwaretesting.com\",\r\n  \"password\": \"welcome01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/users/login",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST NEW PRODUCTS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if the request was successful (e.g., 201 Created or 200 OK for resource creation)\r",
+							"const expectedStatus = pm.iterationData.get(\"expectedStatus\");\r",
+							"\r",
+							"pm.test(\"Status code is matching\", function () {\r",
+							"    if (parseInt(expectedStatus) === 200){\r",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]); // Common success codes for POST\r",
+							"    }else if (parseInt(expectedStatus) === 404){\r",
+							"        pm.expect(pm.response.code).to.be.oneOf([422, 404, 403, 400]); // Not Found\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"if (pm.response.code === 201 || pm.response.code === 200 || pm.response.code === 200) {\r",
+							"    pm.test(\"Response is valid JSON\", function () {\r",
+							"        pm.response.to.be.json;\r",
+							"    });\r",
+							"\r",
+							"    // Parse the JSON response body\r",
+							"    let responseJson;\r",
+							"    try {\r",
+							"        responseJson = pm.response.json();\r",
+							"    } catch (e) {\r",
+							"        pm.expect.fail(\"Could not parse JSON response: \" + e.message);\r",
+							"    }\r",
+							"\r",
+							"    pm.test(\"Response contains valid 'id'\", function () {\r",
+							"        pm.expect(responseJson).to.have.property('id');\r",
+							"        pm.expect(responseJson.id).to.be.a('number', \"The 'id' field is missing or not a number.\");\r",
+							"    });\r",
+							"\r",
+							"    if (responseJson.id) {\r",
+							"        pm.collectionVariables.set(\"new_product_id\", responseJson.id);\r",
+							"        console.log(\"New product ID stored: \" + pm.collectionVariables.get(\"new_product_id\"));\r",
+							"    } else {\r",
+							"        pm.collectionVariables.set(\"new_product_id\", null);\r",
+							"        pm.expect.fail(\"Product ID not found in the response to store.\");\r",
+							"    }\r",
+							"\r",
+							"\r",
+							"} else{\r",
+							"    pm.collectionVariables.unset(\"new_product_id\");\r",
+							"    pm.execution.setNextRequest(null)\r",
+							"}\r",
+							"// Check if the response body is valid JSON\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{name}}\",\r\n  \"description\":\"{{description}}\",\r\n  \"price\": {{price}},\r\n  \"category_id\": {{category_id}},\r\n  \"brand_id\": {{brand_id}},\r\n  \"product_image_id\": {{product_image_id}},\r\n  \"is_location_offer\": {{is_location_offer}},\r\n  \"is_rental\": {{is_rental}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/products",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT POSTED PRODUCT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const expectedStatus = pm.iterationData.get(\"expectedStatus2\");\r",
+							"\r",
+							"pm.test(\"Status code is matching\", function () {\r",
+							"    if (parseInt(expectedStatus) === 200){\r",
+							"        pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]); // Common success codes for POST\r",
+							"    }else if (parseInt(expectedStatus) === 404){\r",
+							"        pm.expect(pm.response.code).to.be.oneOf([422, 404, 403, 400]); // Not Found\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"if (pm.response.code === 201 || pm.response.code === 200 || pm.response.code === 200) {\r",
+							"    pm.test(\"Response is valid JSON\", function () {\r",
+							"        pm.response.to.be.json;\r",
+							"    });\r",
+							"\r",
+							"    let responseJson;\r",
+							"    try {\r",
+							"        responseJson = pm.response.json();\r",
+							"    } catch (e) {\r",
+							"        pm.expect.fail(\"Could not parse JSON response: \" + e.message);\r",
+							"    }\r",
+							"\r",
+							"    pm.test(\"Response contains success message\", function () {\r",
+							"        pm.expect(responseJson).to.have.property('success');\r",
+							"        pm.expect(responseJson.success).to.eql(true);\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{name2}}\",\r\n  \"description\":\"{{description2}}\",\r\n  \"price\": {{price2}},\r\n  \"category_id\": {{category_id2}},\r\n  \"brand_id\": {{brand_id2}},\r\n  \"product_image_id\": {{product_image_id2}},\r\n  \"is_location_offer\": {{is_location_offer2}},\r\n  \"is_rental\": {{is_rental2}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/products/{{new_product_id}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"products",
+						"{{new_product_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE THAT PRODUCT",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/products/{{new_product_id}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"products",
+						"{{new_product_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "baseURL",
+			"value": "http://localhost:8091",
+			"type": "string"
+		},
+		{
+			"key": "new_product_id",
+			"value": ""
+		}
+	]
+}

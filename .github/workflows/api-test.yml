@@ -1,0 +1,66 @@
+name: API-Testing # Tên của workflow
+
+on:
+  push:
+    branches:
+      - main # Chạy kiểm thử khi có push lên nhánh main
+  pull_request:
+    branches:
+      - main # Chạy kiểm thử khi có pull request đến nhánh main
+  workflow_dispatch: # Cho phép kích hoạt thủ công từ giao diện GitHub
+
+jobs:
+  api-testing:
+    runs-on: ubuntu-latest # Hoặc hệ điều hành bạn muốn
+
+    steps:
+    - name: Srouce code checkout
+      uses: actions/checkout@v4
+
+    - name: Node.js setup
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18' # Hoặc phiên bản tương thích với Newman
+
+    - name: Newman report
+      run: npm install -g newman
+
+    - name: Install HTML-Report
+      run: npm install -g newman-reporter-htmlextra
+
+    - name: Copy data csv
+      # Giả sử các file Collection, Environment và Data CSV của bạn nằm trong thư mục gốc của repo
+      # Bạn nên đặt các file .json và .csv đã xuất của mình vào đây.
+      run: |
+        mkdir -p postman-files
+        cp getProducts.json postman-files/ # Collection đầu tiên
+        cp postPutProducts.json postman-files/ # Collection thứ hai
+        cp getProducts.csv postman-files/ # Data file CSV cho collection 1
+        cp postputProducts.csv postman-files/ # Data file CSV cho collection 2
+    - name: Create report folder
+      run: mkdir -p newman-reports
+
+    - name: Run first postman collection
+      run: |
+        newman run postman-files/getProducts.json \
+          -d postman-files/getProducts.csv \ 
+          --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export newman-reports/newman-report-collection1.html
+      env:
+
+    - name: Chạy Postman collection 2 với data file CSV riêng và baseURL Production
+      run: |
+        newman run postman-files/postPutProducts.json \
+          -d postman-files/postputProducts.csv \ 
+          --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export newman-reports/newman-report-collection2.html
+      env:
+  
+    - name: Tải lên các báo cáo Newman
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: newman-reports
+        path: newman-reports/

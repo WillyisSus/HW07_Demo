@@ -1,0 +1,289 @@
+{
+	"info": {
+		"_postman_id": "8ebb7fd6-ac36-4b81-ac7a-b5025f2fdf69",
+		"name": "HW06 - GET Products",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28981845"
+	},
+	"item": [
+		{
+			"name": "GET Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// This script runs after the API request is completed.\r",
+							"// It performs tests based on the 'expectedStatus' and other parameters from the CSV data file.\r",
+							"\r",
+							"// Retrieve the values of all variables from the collection.\r",
+							"const expectedStatus = pm.iterationData.get('expectedStatus');\r",
+							"const brandID = pm.iterationData.get('brandID');\r",
+							"const categoryID = pm.iterationData.get('categoryID');\r",
+							"const sortQuery = pm.iterationData.get('sortQuery');\r",
+							"const priceQuery = pm.iterationData.get('priceQuery');\r",
+							"// Check for a valid response status before proceeding with body tests.\r",
+							"pm.test(\"Status code is as expected\", function () {\r",
+							"     pm.expect(pm.response.code).to.eq(parseInt(expectedStatus))\r",
+							"});\r",
+							"\r",
+							"if (pm.response.status === 200) {\r",
+							"    // --- Test for expectedStatus: 200 OK ---\r",
+							"    \r",
+							"    // Test 1: Validate the 'data' property is a non-empty array.\r",
+							"    pm.test(\"Response 'data' property is a non-empty array\", function () {\r",
+							"        const responseData = pm.response.json();\r",
+							"        pm.expect(responseData).to.have.property('data');\r",
+							"        pm.expect(responseData.data).to.be.an('array');\r",
+							"        pm.expect(responseData.data.length).to.be.at.least(1);\r",
+							"    });\r",
+							"\r",
+							"    // Test 2: If a valid brandID is provided, check if all products in the data list have that brand ID.\r",
+							"    if (brandID && parseInt(brandID) > -1) {\r",
+							"        pm.test(\"All items have the correct brand ID\", function () {\r",
+							"            const responseData = pm.response.json();\r",
+							"            const products = responseData.data;\r",
+							"\r",
+							"            products.forEach(product => {\r",
+							"                pm.expect(product.brand.id).to.equal(parseInt(brandID));\r",
+							"            });\r",
+							"        });\r",
+							"    }\r",
+							"\r",
+							"    // Test 3: If a valid categoryID is provided, check if all products in the data list have that category ID.\r",
+							"    if (categoryID && parseInt(categoryID) > -1) {\r",
+							"        pm.test(\"All items have the correct category ID\", function () {\r",
+							"            const responseData = pm.response.json();\r",
+							"            const products = responseData.data;\r",
+							"\r",
+							"            products.forEach(product => {\r",
+							"                pm.expect(product.category.id).to.equal(parseInt(categoryID));\r",
+							"            });\r",
+							"        });\r",
+							"    }\r",
+							"    if (sortQuery&& sortQuery !== \"null\") {\r",
+							"        if (sortQuery.includes('asc')){\r",
+							"            if (sortQuery.includes('name')) {\r",
+							"                pm.test(\"Products are sorted by name in ascending order (A-Z)\", function () {\r",
+							"                     if (products.length <= 1) {\r",
+							"                        // If there's 0 or 1 product, it's considered sorted\r",
+							"                        pm.expect(true).to.be.true; // Test passes by default\r",
+							"                        return;\r",
+							"                    }\r",
+							"                    let isSorted = true;\r",
+							"                    let unsortedItemIndex = -1;\r",
+							"\r",
+							"                    for (let i = 0; i < products.length - 1; i++) {\r",
+							"                        const currentProductName = products[i].name ? products[i].name.toLowerCase() : '';\r",
+							"                        const nextProductName = products[i + 1].name ? products[i + 1].name.toLowerCase() : '';\r",
+							"\r",
+							"                        // Perform a locale-sensitive string comparison\r",
+							"                        if (currentProductName.localeCompare(nextProductName) > 0) {\r",
+							"                            isSorted = false;\r",
+							"                            unsortedItemIndex = i;\r",
+							"                            break;\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"                    // Assert the sorting\r",
+							"                    pm.expect(isSorted, `Products are not sorted correctly. Item at index ${unsortedItemIndex} ('${products[unsortedItemIndex].name}') is after item at index ${unsortedItemIndex + 1} ('${products[unsortedItemIndex + 1].name}').`).to.be.true;\r",
+							"                });\r",
+							"            } else {\r",
+							"                pm.test(\"Products are sorted by price in ascending order (Low to High)\", function () {\r",
+							"                    if (products.length <= 1) {\r",
+							"                        // If there's 0 or 1 product, it's considered sorted\r",
+							"                        pm.expect(true).to.be.true; // Test passes by default\r",
+							"                        return;\r",
+							"                    }\r",
+							"\r",
+							"                    let isSorted = true;\r",
+							"                    let unsortedItemIndex = -1;\r",
+							"\r",
+							"                    for (let i = 0; i < products.length - 1; i++) {\r",
+							"                        const currentProductPrice = products[i].price;\r",
+							"                        const nextProductPrice = products[i + 1].price;\r",
+							"\r",
+							"                        // Ensure price is a number for comparison\r",
+							"                        pm.expect(currentProductPrice).to.be.a('number', `Price of product at index ${i} is not a number.`);\r",
+							"                        pm.expect(nextProductPrice).to.be.a('number', `Price of product at index ${i + 1} is not a number.`);\r",
+							"\r",
+							"                        if (currentProductPrice > nextProductPrice) {\r",
+							"                            isSorted = false;\r",
+							"                            unsortedItemIndex = i;\r",
+							"                            break;\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"                    // Assert the sorting\r",
+							"                    pm.expect(isSorted, `Products are not sorted correctly by price. Item at index ${unsortedItemIndex} (price: ${products[unsortedItemIndex].price}) is after item at index ${unsortedItemIndex + 1} (price: ${products[unsortedItemIndex + 1].price}).`).to.be.true;\r",
+							"                });\r",
+							"            }  \r",
+							"            \r",
+							"        }else{\r",
+							"            if (sortQuery.includes('name')) {\r",
+							"                pm.test(\"Products are sorted by name in descending order (Z-A)\", function () {\r",
+							"                     if (products.length <= 1) {\r",
+							"                        // If there's 0 or 1 product, it's considered sorted\r",
+							"                        pm.expect(true).to.be.true; // Test passes by default\r",
+							"                        return;\r",
+							"                    }\r",
+							"                    let isSorted = true;\r",
+							"                    let unsortedItemIndex = -1;\r",
+							"\r",
+							"                    for (let i = 0; i < products.length - 1; i++) {\r",
+							"                        const currentProductName = products[i].name ? products[i].name.toLowerCase() : '';\r",
+							"                        const nextProductName = products[i + 1].name ? products[i + 1].name.toLowerCase() : '';\r",
+							"\r",
+							"                        // Perform a locale-sensitive string comparison\r",
+							"                        if (nextProductName.localeCompare(currentProductName) > 0) {\r",
+							"                            isSorted = false;\r",
+							"                            unsortedItemIndex = i;\r",
+							"                            break;\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"                    // Assert the sorting\r",
+							"                    pm.expect(isSorted, `Products are not sorted correctly. Item at index ${unsortedItemIndex} ('${products[unsortedItemIndex].name}') is after item at index ${unsortedItemIndex + 1} ('${products[unsortedItemIndex + 1].name}').`).to.be.true;\r",
+							"                });\r",
+							"            } else {\r",
+							"                pm.test(\"Products are sorted by price in descending order (High to Low)\", function () {\r",
+							"                    if (products.length <= 1) {\r",
+							"                        // If there's 0 or 1 product, it's considered sorted\r",
+							"                        pm.expect(true).to.be.true; // Test passes by default\r",
+							"                        return;\r",
+							"                    }\r",
+							"\r",
+							"                    let isSorted = true;\r",
+							"                    let unsortedItemIndex = -1;\r",
+							"\r",
+							"                    for (let i = 0; i < products.length - 1; i++) {\r",
+							"                        const currentProductPrice = products[i].price;\r",
+							"                        const nextProductPrice = products[i + 1].price;\r",
+							"\r",
+							"                        // Ensure price is a number for comparison\r",
+							"                        pm.expect(currentProductPrice).to.be.a('number', `Price of product at index ${i} is not a number.`);\r",
+							"                        pm.expect(nextProductPrice).to.be.a('number', `Price of product at index ${i + 1} is not a number.`);\r",
+							"\r",
+							"                        if (nextProductPrice > currentProductPrice) {\r",
+							"                            isSorted = false;\r",
+							"                            unsortedItemIndex = i;\r",
+							"                            break;\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"                    // Assert the sorting\r",
+							"                    pm.expect(isSorted, `Products are not sorted correctly by price. Item at index ${unsortedItemIndex} (price: ${products[unsortedItemIndex].price}) is after item at index ${unsortedItemIndex + 1} (price: ${products[unsortedItemIndex + 1].price}).`).to.be.true;\r",
+							"                });\r",
+							"            }  \r",
+							"        }\r",
+							"       \r",
+							"    }\r",
+							"    const delimiter = '%2C';\r",
+							"    if (priceQuery && priceQuery != \"null\"){\r",
+							"        const [temp, low, high] = priceQuery.split(delimiter);\r",
+							"        pm.test(\"Products are within the specified price range\", function () {\r",
+							"            pm.expect(products.length).to.be.above(0, \"No products returned in the response.\");\r",
+							"            products.forEach((product, index) => {\r",
+							"                const productPrice = product.price;\r",
+							"                // Ensure price is a number for comparison\r",
+							"                pm.expect(productPrice).to.be.a('number', `Price of product at index ${index} is not a number.`);\r",
+							"\r",
+							"                // Check if the product's price is within the range\r",
+							"                pm.expect(productPrice).to.be.at.least(low, `Product at index ${index} ('${product.name || 'Unnamed'}') has price ${productPrice}, which is below the minimum of ${minPrice}.`);\r",
+							"                pm.expect(productPrice).to.be.at.most(high, `Product at index ${index} ('${product.name || 'Unnamed'}') has price ${productPrice}, which is above the maximum of ${maxPrice}.`);\r",
+							"            })\r",
+							"        });\r",
+							"    }\r",
+							"} else if (pm.response.status === 404) {\r",
+							"    // --- Test for expectedStatus: 404 NOT FOUND ---\r",
+							"    \r",
+							"    // Test 1: Validate that the response body only contains an 'error' property.\r",
+							"    pm.test(\"Response body only contains an 'error' property\", function () {\r",
+							"        const responseData = pm.response.json();\r",
+							"        pm.expect(responseData).to.have.property('error');\r",
+							"        \r",
+							"        // Ensure there are no other properties besides 'error'.\r",
+							"        const responseKeys = Object.keys(responseData);\r",
+							"        pm.expect(responseKeys.length).to.equal(1);\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/products?by_brand={{brandID}}&by_category={{categoryID}}&between={{priceQuery}}&sort={{sortQuery}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "by_brand",
+							"value": "{{brandID}}"
+						},
+						{
+							"key": "by_category",
+							"value": "{{categoryID}}"
+						},
+						{
+							"key": "between",
+							"value": "{{priceQuery}}"
+						},
+						{
+							"key": "sort",
+							"value": "{{sortQuery}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "http://localhost:8091",
+			"type": "string"
+		}
+	]
+}
