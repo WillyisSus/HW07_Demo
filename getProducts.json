@@ -282,7 +282,7 @@
 	"variable": [
 		{
 			"key": "baseURL",
-			"value": "http://localhost:8091",
+			"value": "ttps://api-with-bugs.practicesoftwaretesting.com",
 			"type": "string"
 		}
 	]
