@@ -21,37 +21,20 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18' # Hoặc phiên bản tương thích với Newman
-
     - name: Newman report
       run: npm install -g newman
-
-    - name: Install HTML-Report
-      run: npm install -g newman-reporter-htmlextra
-
-    - name: Create report folders
-      run: mkdir -p newman-reports
       
     - name: Run getProducts collection
       run: |
         newman run getProducts.json \
           -d getProducts.csv \ 
           # --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
-          --reporters cli,htmlextra \
-          --reporter-htmlextra-export newman-reports/newman-report-collection1.html
+          --reporters cli
       continue-on-error: true
     - name: Run postPutProducts collection
       run: |
         newman run postPutProducts.json \
           -d postputProducts.csv \ 
           # --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
-          --reporters cli,htmlextra \
-          --reporter-htmlextra-export newman-reports/newman-report-collection2.html
+          --reporters cli
       continue-on-error: true
-    - name: Check report files
-      run: ls -R newman-reports/ 
-    - name: Upload newman reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: newman-reports
-        path: newman-reports/
