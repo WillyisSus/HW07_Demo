@@ -28,31 +28,19 @@ jobs:
     - name: Install HTML-Report
       run: npm install -g newman-reporter-htmlextra
 
-    - name: Copy data csv
-      # Giả sử các file Collection, Environment và Data CSV của bạn nằm trong thư mục gốc của repo
-      # Bạn nên đặt các file .json và .csv đã xuất của mình vào đây.
-      run: |
-        mkdir -p postman-files
-        cp getProducts.json postman-files/ # Collection đầu tiên
-        cp postPutProducts.json postman-files/ # Collection thứ hai
-        cp getProducts.csv postman-files/ # Data file CSV cho collection 1
-        cp postputProducts.csv postman-files/ # Data file CSV cho collection 2
-    - name: Create report folder
-      run: mkdir -p newman-reports
-
     - name: Run getProducts collection
       run: |
-        newman run postman-files/getProducts.json \
-          -d postman-files/getProducts.csv \ 
-          --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
+        newman run getProducts.json \
+          -d getProducts.csv \ 
+          # --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection1.html
 
     - name: Run postPutProducts collection
       run: |
-        newman run postman-files/postPutProducts.json \
-          -d postman-files/postputProducts.csv \ 
-          --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
+        newman postPutProducts.json \
+          -d postputProducts.csv \ 
+          # --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection2.html
   
