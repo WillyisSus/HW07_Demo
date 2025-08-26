@@ -304,7 +304,7 @@
 		},
 		{
 			"key": "baseURL",
-			"value": "ttps://api-with-bugs.practicesoftwaretesting.com",
+			"value": "https://api-with-bugs.practicesoftwaretesting.com",
 			"type": "string"
 		},
 		{
