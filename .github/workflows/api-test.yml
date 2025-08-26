@@ -47,7 +47,6 @@ jobs:
           --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection1.html
-      env:
 
     - name: Chạy Postman collection 2 với data file CSV riêng và baseURL Production
       run: |
@@ -56,7 +55,6 @@ jobs:
           --env-var "baseURL=https://api-with-bugs.practicesoftwaretesting.com" \ 
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection2.html
-      env:
   
     - name: Tải lên các báo cáo Newman
       uses: actions/upload-artifact@v4
