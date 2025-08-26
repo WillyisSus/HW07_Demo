@@ -40,7 +40,7 @@ jobs:
     - name: Create report folder
       run: mkdir -p newman-reports
 
-    - name: Run first postman collection
+    - name: Run getProducts collection
       run: |
         newman run postman-files/getProducts.json \
           -d postman-files/getProducts.csv \ 
@@ -48,7 +48,7 @@ jobs:
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection1.html
 
-    - name: Chạy Postman collection 2 với data file CSV riêng và baseURL Production
+    - name: Run postPutProducts collection
       run: |
         newman run postman-files/postPutProducts.json \
           -d postman-files/postputProducts.csv \ 
@@ -56,7 +56,7 @@ jobs:
           --reporters cli,htmlextra \
           --reporter-htmlextra-export newman-reports/newman-report-collection2.html
   
-    - name: Tải lên các báo cáo Newman
+    - name: Upload newman reports
       uses: actions/upload-artifact@v4
       if: always()
       with:
